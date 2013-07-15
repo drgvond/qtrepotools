@@ -7,6 +7,9 @@ function _qset_check ()
     fi
 }
 
+export QT5BUILDSUFFIX=""
+export QT5SRCSUFFIX=""
+
 function qset ()
 {
     if [ $# -le 1 ]; then
@@ -34,26 +37,41 @@ function qset ()
             OLD_SRC_DIR=$QT5SRCDIR
             export QT5SRCDIR=${_QTSRCDIR}/qt5-$1
             _qreplacepath "$OLD_SRC_DIR" $QT5SRCDIR
+            export QT5SRCSUFFIX=$1
         fi
         if [ -n "$set_build" ]; then
             OLD_BUILD_DIR=$QT5BUILDDIR
             export QT5BUILDDIR=${_QTBUILDDIR}/qt5-$1-build
             _qreplacepath "$OLD_BUILD_DIR" $QT5BUILDDIR
+            export QT5BUILDSUFFIX=$1
         fi
     elif [ -n "$clear" ]; then
         if [ -n "$set_src" -a -n "$QT5SRCDIR" ]; then
             _qreplacepath $QT5SRCDIR ""
             export QT5SRCDIR=""
+            export QT5SRCSUFFIX=""
         fi
         if [ -n "$set_build" -a -n "$QT5BUILDDIR" ]; then
             _qreplacepath $QT5BUILDDIR ""
             export QT5BUILDDIR=""
+            export QT5BUILDSUFFIX=""
         fi
     else
         echo QT5SRCDIR $QT5SRCDIR
         echo QT5BUILDDIR $QT5BUILDDIR
     fi
     export PATH
+}
+
+function qset_prompt () 
+{
+    local src=$QT5SRCSUFFIX
+    local build=$QT5BUILDSUFFIX
+    [ -z $src -a -z $build ] && echo "" && return
+    [ -z $src ] && src="?"
+    [ -z $build ] && build="?"
+    [ $build = $src ] && echo " ($src)" && return
+    echo " ($src > $build)"
 }
 
 _QPATHSUFFIX="/qtbase/bin"
