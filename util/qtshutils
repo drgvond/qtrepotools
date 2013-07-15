@@ -1,8 +1,7 @@
 function _qset_check ()
 {
     if [ -z "$QT5SRCDIR" -o -z "$QT5BUILDDIR" ]; then
-        caller 1
-        echo "$1: No Qt src and build dirs set."
+        [ "$1" != "-s" ] && caller 1 && echo "$1: No Qt src and build dirs set."
         return 1
     fi
 }
@@ -225,12 +224,12 @@ function qupdate ()
 
 function qbuild_completion ()
 {
-    _qset_check || return 1
+    _qset_check -s || return 1
     local cur=${COMP_WORDS[$COMP_CWORD]}
     if [ "$cur" = "-" ]; then
         COMPREPLY="-"
     elif [ -z $cur ]; then
-        COMPREPLY=$( `ls -d $QT5SRCDIR/q* | xargs basename` )
+        COMPREPLY=( `ls -d $QT5SRCDIR/q* | xargs basename` )
     else
         COMPREPLY=( `ls $QT5SRCDIR | grep ^$cur` )
     fi
