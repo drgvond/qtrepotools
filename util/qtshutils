@@ -1,3 +1,12 @@
+function _qset_check ()
+{
+    if [ -z "$QT5SRCDIR" -o -z "$QT5BUILDDIR" ]; then
+        caller 1
+        echo "$1: No Qt src and build dirs set."
+        return 1
+    fi
+}
+
 function qset ()
 {
     if [ $# -le 1 ]; then
@@ -62,6 +71,7 @@ function _qreplacepath ()
 
 function qcd ()
 {
+    _qset_check || return 1
     src_dir_match=$(expr $PWD : $QT5SRCDIR)
     build_dir_match=$(expr $PWD : $QT5BUILDDIR)
 
@@ -102,11 +112,13 @@ complete -F qcd_completion qcd
 
 function qgit ()
 {
+    _qset_check || return 1
     (qcd -s $1 && shift && git $@)
 }
 
 function qrebuild ()
 {
+    _qset_check || return 1
     for module in $*; do
         module_dir=$QT5BUILDDIR/$module
         saved_config_status=""
@@ -137,6 +149,7 @@ function qrebuild ()
 
 function qbuild ()
 {
+    _qset_check || return 1
     set -- $(getopt acqnd: "$@")
     do_clean=""
     do_qmake=""
@@ -164,6 +177,7 @@ function qbuild ()
 
 function qupdate ()
 {
+    _qset_check || return 1
     set -- $(getopt sc:p "$@")
     do_stash=""
     do_unstash=""
@@ -189,6 +203,7 @@ function qupdate ()
 
 function qbuild_completion ()
 {
+    _qset_check || return 1
     local cur=${COMP_WORDS[$COMP_CWORD]}
     if [ "$cur" = "-" ]; then
         COMPREPLY="-"
