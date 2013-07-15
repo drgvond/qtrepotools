@@ -128,9 +128,9 @@ function qrebuild ()
                 cat $module_dir/config.status > $saved_config_status
                 chmod 755 $saved_config_status
             else
-                echo "qrebuild: I can't reconfigure $module. I'll try clean and make it..."
-                qbuild -c -q $module
-                continue
+                [ -d $module_dir ] || mkdir -p $module_dir
+                echo "$FUNCNAME: I can't (re)configure qtbase. Exiting..."
+                return 1
             fi
         fi
         (cd $QT5BUILDDIR && rm -rf $module)
@@ -168,10 +168,15 @@ function qbuild ()
     done;
 
     for module in $*; do
-        (cd $QT5BUILDDIR/$module$build_subdir && echo $PWD || return -1
-        [ -z $do_clean ] || make clean || return -1 
-        [ -z $do_qmake ] || make qmake || return -1 
-        [ -z $do_make ] || make || return -1)
+        if [ ! -d $QT5BUILDDIR/$module ]; then
+            echo "$FUNCNAME: No previous build for $module. Building from scratch..."
+            qrebuild $module
+        else
+            (cd $QT5BUILDDIR/$module$build_subdir && echo $PWD || return 1
+            [ -z $do_clean ] || make clean || return 1 
+            [ -z $do_qmake ] || make qmake || return 1 
+            [ -z $do_make ] || make || return 1)
+        fi
     done
 }
 
@@ -196,8 +201,7 @@ function qupdate ()
         (cd $QT5SRCDIR/$module && echo $PWD && \
         [ -z $do_stash ] || git stash && \
         [ -z $co_branch ] || git checkout $co_branch && \
-        git pull --rebase  && \
-        [ -z $do_unstash ] || echo "qupdate: Unstash it yourself!") || break;
+        git pull --rebase ) || break;
     done;
 }
 
@@ -208,7 +212,7 @@ function qbuild_completion ()
     if [ "$cur" = "-" ]; then
         COMPREPLY="-"
     elif [ -z $cur ]; then
-        COMPREPLY=( `ls -d $QT5SRCDIR/q* | xargs basename` )
+        COMPREPLY=$( `ls -d $QT5SRCDIR/q* | xargs basename` )
     else
         COMPREPLY=( `ls $QT5SRCDIR | grep ^$cur` )
     fi
