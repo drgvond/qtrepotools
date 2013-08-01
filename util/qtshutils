@@ -56,8 +56,8 @@ function qset ()
             export QT5BUILDSUFFIX=""
         fi
     else
-        echo QT5SRCDIR $QT5SRCDIR
-        echo QT5BUILDDIR $QT5BUILDDIR
+        echo QT5SRCDIR=$QT5SRCDIR
+        echo QT5BUILDDIR=$QT5BUILDDIR
     fi
     export PATH
 }
