@@ -108,11 +108,15 @@ function qcd ()
         else
             dest_dir=${PWD/$QT5BUILDDIR/$QT5SRCDIR}
         fi
-        else
+    else
         if [ $src_dir_match -gt $build_dir_match ]; then
             dest_dir=$QT5SRCDIR/$1
         else
             dest_dir=$QT5BUILDDIR/$1
+	    if [ ! -d "$dest_dir" ]; then
+		read -p "Target dir $dest_dir doesn't exist. Create? [Y/n] " answer
+		[ -z "$answer" -o "$answer" = "Y" -o "$answer" = "y" ] && mkdir -p $dest_dir || return
+	    fi
         fi
     fi
 
