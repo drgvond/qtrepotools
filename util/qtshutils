@@ -233,9 +233,11 @@ function qbuild_completion ()
     if [ "$cur" = "-" ]; then
         COMPREPLY="-"
     elif [ -z $cur ]; then
-        COMPREPLY=( `ls -d $QT5SRCDIR/q* | xargs basename` )
-    else
+        COMPREPLY=( `ls -d $QT5SRCDIR/qt* | xargs basename` )
+    elif (( $(expr $cur : "qt") >= 2 )); then
         COMPREPLY=( `ls $QT5SRCDIR | grep ^$cur` )
+    else
+        COMPREPLY=( `ls $QT5SRCDIR | grep qt$cur` )
     fi
 }
 
