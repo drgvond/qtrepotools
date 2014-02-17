@@ -11,7 +11,7 @@ export QT5SRCSUFFIX=""
 
 function qset ()
 {
-    if [ $# -le 1 ]; then
+    if (( $# <= 1 )); then
         set_src="Y"
         set_build="Y"
     else
@@ -21,7 +21,7 @@ function qset ()
     clear=""
 
     set -- $(getopt sbc "$@")
-    while [ $# -gt 0 ]; do
+    while (( $# > 0 )); do
         case $1 in
         -s) set_src="Y";;
         -b) set_build="Y";;
@@ -93,7 +93,7 @@ function qcd ()
     build_dir_match=$(expr $PWD : $QT5BUILDDIR)
 
     set -- $(getopt sb "$@")
-    while [ $# -gt 0 ]; do
+    while (( $# > 0 )); do
         case $1 in
         -s) src_dir_match=10000000;;
         -b) build_dir_match=10000000;;
@@ -176,7 +176,7 @@ function qbuild ()
     do_qmake=""
     do_make="Y"
     build_subdir="/src"
-    while [ $# -gt 0 ]; do
+    while (( $# > 0 )); do
         case $1 in
             -a) build_subdir="";;
             -c) do_clean="Y";;
@@ -208,7 +208,7 @@ function qupdate ()
     do_stash=""
     do_unstash=""
     co_branch=""
-    while [ $# -gt 0 ]; do
+    while (( $# > 0 )); do
         case $1 in
             -s) do_stash="Y";;
             -c) co_branch="$2"; shift;;
