@@ -239,10 +239,11 @@ function qbuild_completion ()
     fi
 }
 
+alias qb=qbuild
+
 complete -F qbuild_completion qbuild
+complete -F qbuild_completion qb
 complete -F qbuild_completion qrebuild
 complete -F qbuild_completion qupdate
 
-alias qb=qbuild
 alias qg=qgit
-alias qu=qupdate
