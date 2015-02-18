@@ -8,6 +8,46 @@ function _qset_check ()
 
 export QT5BUILDSUFFIX=""
 export QT5SRCSUFFIX=""
+export QT5DIRPREFIX="qt5"
+export QT5CONFIGUREFLAGS="-opensource -confirm-license -developer-build -nomake examples -nomake tests"
+
+function qconfigure ()
+{
+	_qset_check || return 1
+	mkdir -p ${QT5BUILDDIR}/qtbase
+	cd ${QT5BUILDDIR}/qtbase
+	${QT5SRCDIR}/qtbase/configure ${QT5CONFIGUREFLAGS} $@
+}
+
+function qinit ()
+{
+	new_qtdir=${_QTSRCDIR}/${QT5DIRPREFIX}-$1
+	mkdir ${new_qtdir}
+	modules=$(ls ${_QTSRCDIR}/${QT5DIRPREFIX})
+	if [ "$2" ]; then
+		remote_branch=$2
+	else
+		remote_branch="dev"
+	fi
+	for module in ${modules}; do
+		echo
+		echo "Updating original ${module}..."
+		(cd ${_QTSRCDIR}/${QT5DIRPREFIX}/${module}; git fetch origin ${remote_branch})
+		echo "New ${module} workdir into ${new_qtdir}/${module}..."
+		git new-workdir ${_QTSRCDIR}/${QT5DIRPREFIX}/${module} ${new_qtdir}/${module} origin/${remote_branch}
+		pushd ${new_qtdir}/${module}
+		if [ "$(git branch --list $1)" ]; then
+			echo "Checking out $1..."
+			git checkout $1
+		else
+			echo "Checking out $1 from origin/${remote_branch}..."
+			git checkout -b $1 origin/${remote_branch}
+		fi
+		popd > /dev/null
+		echo "${new_qtdir}/${module} is ready"
+	done;
+	qset $1
+}
 
 function qset ()
 {
@@ -34,13 +74,13 @@ function qset ()
     if [ -n "$1" ]; then
         if [ -n "$set_src" ]; then
             OLD_SRC_DIR=$QT5SRCDIR
-            export QT5SRCDIR=${_QTSRCDIR}/qt5-$1
+            export QT5SRCDIR=${_QTSRCDIR}/${QT5DIRPREFIX}-$1
             _qreplacepath "$OLD_SRC_DIR" $QT5SRCDIR
             export QT5SRCSUFFIX=$1
         fi
         if [ -n "$set_build" ]; then
             OLD_BUILD_DIR=$QT5BUILDDIR
-            export QT5BUILDDIR=${_QTBUILDDIR}/qt5-$1-build
+            export QT5BUILDDIR=${_QTBUILDDIR}/${QT5DIRPREFIX}-$1-build
             _qreplacepath "$OLD_BUILD_DIR" $QT5BUILDDIR
             export QT5BUILDSUFFIX=$1
         fi
