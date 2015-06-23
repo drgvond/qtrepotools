@@ -49,6 +49,16 @@ function qinit ()
 	qset $1
 }
 
+function qls ()
+{
+    if [ "$1" = "-b" ]; then
+	dir=${_QTBUILDDIR}
+    else
+	dir=${_QTSRCDIR}
+    fi
+    ls -d ${dir}/${QT5DIRPREFIX}* | sed -e s@${dir}/@@g
+}
+
 function qset ()
 {
     if (( $# <= 1 )); then
@@ -100,6 +110,18 @@ function qset ()
         echo QT5BUILDDIR=$QT5BUILDDIR
     fi
     export PATH
+}
+
+function qset_completion ()
+{
+    local cur=${COMP_WORDS[$COMP_CWORD]}
+    if [ "$cur" = "-" ]; then
+	COMPREPLY=( "-b" "-s" )
+    elif [ "$3" = "-b" ]; then
+	COMPREPLY=( `qls -b | sed -e s/${QT5DIRPREFIX}-//g` )
+    else
+	COMPREPLY=( `qls | sed -e s/${QT5DIRPREFIX}-//g | grep -v qt5 | grep ^$cur` )
+    fi
 }
 
 function qset_prompt () 
@@ -283,6 +305,7 @@ function qbuild_completion ()
 
 alias qb=qbuild
 
+complete -F qset_completion qset
 complete -F qbuild_completion qbuild
 complete -F qbuild_completion qb
 complete -F qbuild_completion qrebuild
